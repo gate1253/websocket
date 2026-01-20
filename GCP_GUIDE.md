@@ -34,5 +34,27 @@
    npm start
    ```
 
-## 4. 접속 주소
+3. **Persistent Run (세션 종료 방지)**:
+   SSH를 닫아도 서버가 계속 돌게 하려면 PM2를 사용하세요.
+   ```bash
+   sudo npm install -g pm2
+   pm2 start server.js --name "ws-server"
+   pm2 save
+   ```
+   또는 간단하게 `nohup npm start &` 를 사용하세요.
+
+## 4. 접속 테스트
+`426 Upgrade Required` 응답이 오는 것은 **서버가 정상적으로 작동 중**이라는 아주 좋은 신호입니다! 웹소켓은 일반 HTTP가 아닌 전용 프로토콜이 필요하기 때문입니다.
+
+**브라우저 콘솔 테스트 방법**:
+1. 브라우저에서 `F12`를 눌러 개발자 도구를 엽니다.
+2. `Console` 탭에 아래 코드를 입력합니다.
+   - **주의**: `chrome://` 페이지나 보안이 엄격한 사이트에서는 **CSP 오류**가 발생할 수 있습니다. `about:blank`나 일반 웹사이트(구글 등)에서 시도하세요.
+```javascript
+const ws = new WebSocket('ws://<GCP_인스턴스_외부_IP>:8080');
+ws.onopen = () => { console.log('연결됨!'); ws.send('Hello Server!'); };
+ws.onmessage = (e) => console.log('받은 메시지:', e.data);
+```
+
+## 5. 접속 주소
 - `ws://<GCP_인스턴스_외부_IP>:8080`

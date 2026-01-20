@@ -9,15 +9,25 @@ wss.on('connection', (ws) => {
 
   ws.on('message', (message) => {
     console.log(`수신 메시지: ${message}`);
-    // 받은 메시지를 그대로 되돌려줍니다 (에코)
-    ws.send(`서버에서 받은 메시지: ${message}`);
+
+    try {
+      const data = JSON.parse(message);
+
+      // 브로드캐스팅: 나를 제외한 모든 클라이언트에게 전송
+      wss.clients.forEach((client) => {
+        if (client !== ws && client.readyState === WebSocket.OPEN) {
+          // 수신한 데이터를 그대로 전송 (메시지 타입 유지)
+          client.send(JSON.stringify(data));
+        }
+      });
+    } catch (e) {
+      console.error('메시지 파싱 에러:', e.message);
+    }
   });
 
   ws.on('close', () => {
     console.log('클라이언트 연결이 종료되었습니다.');
   });
-
-  ws.send('웹소켓 서버에 오신 것을 환영합니다!');
 });
 
-console.log(`웹소켓 서버가 ${port} 포트에서 실행 중입니다.`);
+console.log(`웹소켓 채팅 서버가 ${port} 포트에서 실행 중입니다.`);
