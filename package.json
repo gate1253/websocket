@@ -1,0 +1,12 @@
+{
+    "name": "websocket-server",
+    "version": "1.0.0",
+    "description": "구글 클라우드용 간단한 웹소켓 서버 (한글 가이드 포함)",
+    "main": "server.js",
+    "scripts": {
+        "start": "node server.js"
+    },
+    "dependencies": {
+        "ws": "^8.13.0"
+    }
+}
