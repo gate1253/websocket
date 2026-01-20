@@ -1,0 +1,9 @@
+name = "wss-proxy-worker"
+main = "src/index.js"
+compatibility_date = "2024-01-01"
+
+[vars]
+# GCP 웹소켓 서버 주소 (ws://IP:PORT)
+# 실제 IP를 환경 변수로 설정하거나 여기에 직접 입력하세요.
+# 예: BACKEND_WS_URL = "ws://35.196.255.142:8080"
+BACKEND_WS_URL = "ws://<GCP_IP>:8080"
