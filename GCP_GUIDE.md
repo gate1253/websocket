@@ -35,13 +35,14 @@
    ```
 
 3. **Persistent Run (세션 종료 방지)**:
-   SSH를 닫아도 서버가 계속 돌게 하려면 PM2를 사용하세요.
+   SSH를 닫아도 서버가 계속 돌게 하려면 PM2를 사용하세요. 80번 포트 사용 시에는 `sudo` 권한이 필요할 수 있습니다.
    ```bash
    sudo npm install -g pm2
-   pm2 start server.js --name "ws-server"
+   # 80번 포트로 실행 (Let's Encrypt 인증용)
+   sudo PORT=80 pm2 start server.js --name "ws-server"
    pm2 save
    ```
-   또는 간단하게 `nohup npm start &` 를 사용하세요.
+   또는 간단하게 `sudo PORT=80 nohup npm start &` 를 사용하세요.
 
 ## 4. 접속 테스트
 `426 Upgrade Required` 응답이 오는 것은 **서버가 정상적으로 작동 중**이라는 아주 좋은 신호입니다! 웹소켓은 일반 HTTP가 아닌 전용 프로토콜이 필요하기 때문입니다.
