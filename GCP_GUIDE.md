@@ -56,5 +56,43 @@ ws.onopen = () => { console.log('연결됨!'); ws.send('Hello Server!'); };
 ws.onmessage = (e) => console.log('받은 메시지:', e.data);
 ```
 
-## 5. 접속 주소
-- `ws://<GCP_인스턴스_외부_IP>:8080`
+## 5. SSL/TLS 설정 (HTTPS/WSS)
+웹소켓 보안 연결(`wss://`)을 위해 Let's Encrypt 인증서를 발급받고 적용하는 방법입니다.
+
+### 5.1 인증서 발급 (Certbot)
+1. **Certbot 설치**:
+   ```bash
+   sudo apt update && sudo apt install certbot
+   ```
+2. **인증서 발급**:
+   (주의: 80 포트가 열려 있어야 하며 다른 프로세스가 사용 중이지 않아야 함)
+   ```bash
+   sudo certbot certonly --standalone -d your-domain.com
+   ```
+3. **인증서 경로**:
+   - `/etc/letsencrypt/live/your-domain.com/fullchain.pem`
+   - `/etc/letsencrypt/live/your-domain.com/privkey.pem`
+
+### 5.2 웹소켓 서버 코드 수정 (server.js)
+보안 연결을 위해 서버 코드를 다음과 같이 수정해야 합니다.
+
+```javascript
+const fs = require('fs');
+const https = require('https');
+const WebSocket = require('ws');
+
+const server = https.createServer({
+  cert: fs.readFileSync('/etc/letsencrypt/live/your-domain.com/fullchain.pem'),
+  key: fs.readFileSync('/etc/letsencrypt/live/your-domain.com/privkey.pem')
+});
+
+const wss = new WebSocket.Server({ server });
+
+server.listen(8080, () => {
+  console.log('WSS 서버가 8080 포트에서 실행 중입니다.');
+});
+```
+
+## 6. 최종 접속 주소
+- **비보안**: `ws://<GCP_인스턴스_외부_IP>:8080`
+- **보안**: `wss://<도메인_이름>:8080`
