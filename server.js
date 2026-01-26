@@ -55,10 +55,21 @@ wss.on('connection', (ws) => {
       // join 메시지 처리
       if (data.type === 'join') {
         currentRoom = data.room;
+        ws.clientId = data.clientId; // 소켓 객체에 clientId 저장
+
         if (!rooms.has(currentRoom)) {
           rooms.set(currentRoom, new Set());
         }
         rooms.get(currentRoom).add(ws);
+
+        // 해당 방의 다른 모든 클라이언트에게 join 브로드캐스트 (새 피어 알림)
+        if (rooms.has(currentRoom)) {
+          rooms.get(currentRoom).forEach((client) => {
+            if (client !== ws && client.readyState === WebSocket.OPEN) {
+              client.send(JSON.stringify(data));
+            }
+          });
+        }
 
         // 해당 방의 모든 클라이언트에게 접속자 수 브로드캐스트
         broadcastUserCount(currentRoom);
@@ -83,10 +94,17 @@ wss.on('connection', (ws) => {
     if (currentRoom && rooms.has(currentRoom)) {
       rooms.get(currentRoom).delete(ws);
 
-      // 방에 더 이상 참여자가 없으면 방 정보 삭제, 있으면 인원수 업데이트 브로드캐스트
+      // 방에 더 이상 참여자가 없으면 방 정보 삭제, 있으면 인원수 및 leave 브로드캐스트
       if (rooms.get(currentRoom).size === 0) {
         rooms.delete(currentRoom);
       } else {
+        // 남은 클라이언트들에게 이 클라이언트가 나갔음을 알림
+        const leaveData = JSON.stringify({ type: 'leave', clientId: ws.clientId });
+        rooms.get(currentRoom).forEach((client) => {
+          if (client.readyState === WebSocket.OPEN) {
+            client.send(leaveData);
+          }
+        });
         broadcastUserCount(currentRoom);
       }
     }
